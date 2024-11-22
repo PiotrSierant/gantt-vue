@@ -2,7 +2,7 @@
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import Timer from './Timer.vue';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useFullscreen } from '@vueuse/core';
 import axios from 'axios';
 
@@ -34,16 +34,27 @@ onMounted(async () => {
     }, 5000);
 });
 
+const currentDate = ref(new Date());
+const updateCurrentDate = () => {
+    currentDate.value = new Date();
+};
+
 const name = computed(() => zegar.value?.name || 'Brak nazwy');
-const formattedNowDate = computed(() => format(new Date(), 'dd MMM yyyy / HH:mm', { locale: pl }));
+const formattedNowDate = computed(() => format(currentDate.value, 'dd MMM yyyy / HH:mm', { locale: pl }));
 const user = computed(() => zegar.value?.user || {});
 const parsedData = computed(() => (zegar.value ? JSON.parse(zegar.value.data) : []));
 
-const currentDate = new Date();
+onMounted(() => {
+    const interval = setInterval(updateCurrentDate, 1000); // Aktualizacja co sekundę
+    onUnmounted(() => {
+        clearInterval(interval);
+    });
+});
+
 const lastDate = computed(() => (parsedData.value[0]?.end ? new Date(parsedData.value[0].end) : null));
 const daysLeft = computed(() => {
     if (!lastDate.value) return 0;
-    const timeDifference = lastDate.value.getTime() - currentDate.getTime();
+    const timeDifference = lastDate.value.getTime() - currentDate.value.getTime();
     return timeDifference > 0 ? Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) : 0;
 });
 

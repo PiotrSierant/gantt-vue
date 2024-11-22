@@ -70,23 +70,22 @@ const onSubmit = async (e) => {
 <template>
     <div class="card flex justify-center">
         <Toast />
-        <Form :initialValues="form" :resolver="resolver" @submit="onSubmit" class="flex flex-col gap-4 w-full">
-            <FormField name="firstname" class="flex flex-col gap-1">
+        <Form :initialValues="form" :resolver="resolver" @submit="onSubmit" class="flex flex-wrap gap-4 w-full">
+            <FormField name="firstname" class="flex flex-col gap-1 w-[250px]">
                 <InputText v-model="form.firstname" type="text" placeholder="Imię" @blur="touchedFields.firstname = true" />
                 <Message v-if="touchedFields.firstname && !form.firstname" severity="error" size="small" variant="simple" class="p-message-error">Imię jest wymagane.</Message>
             </FormField>
 
-            <FormField name="lastname" class="flex flex-col gap-1">
+            <FormField name="lastname" class="flex flex-col gap-1 w-[250px]">
                 <InputText v-model="form.lastname" type="text" placeholder="Nazwisko" @blur="touchedFields.lastname = true" />
                 <Message v-if="touchedFields.lastname && !form.lastname" severity="error" size="small" variant="simple" class="p-message-error">Nazwisko jest wymagane.</Message>
             </FormField>
 
-            <FormField name="phone" class="flex flex-col gap-1">
+            <FormField name="phone" class="flex flex-col gap-1 w-[250px]">
                 <InputText v-model="form.phone" placeholder="Numer telefonu" @blur="touchedFields.phone = true" />
                 <Message v-if="touchedFields.phone && !form.phone" severity="error" size="small" variant="simple" class="p-message-error">Numer telefonu jest wymagany.</Message>
             </FormField>
-
-            <Button type="submit" severity="primary" label="Submit" />
+            <Button type="submit" severity="primary" label="Submit" class="w-[250px] mb-auto" />
         </Form>
     </div>
 </template>

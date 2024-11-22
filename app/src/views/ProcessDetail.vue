@@ -42,6 +42,8 @@ const fetchProcessDetail = async () => {
             tasks.splice(0, tasks.length, ...JSON.parse(response.data.data)); // Przypisujemy dane reaktywnie
             name.value = response.data.name;
             userId.value = response.data.user_id;
+
+            console.log(tasks);
         }
     } catch (error) {
         console.error('Błąd:', error);
@@ -160,12 +162,14 @@ function handleToggleActionInGanttChart() {
 <template>
     <div class="card w-full relative">
         <LoaderGanttChartAction v-if="actionInGanttChart" />
-        <div class="w-full flex gap-2 justify-end mb-4">
-            <!-- <Button type="button" data-view="Quarter Day" :class="{ selected: currentViewMode === 'Quarter Day' }" @click="changeViewMode('Quarter Day')"></Button> -->
-            <Button type="button" data-view="Half Day" :class="{ selected: currentViewMode === 'Half Day' }" @click="changeViewMode('Half Day')">Pół dnia</Button>
-            <Button type="button" data-view="Day" :class="{ selected: currentViewMode === 'Day' }" @click="changeViewMode('Day')">Dzień</Button>
-            <Button type="button" data-view="Week" :class="{ selected: currentViewMode === 'Week' }" @click="changeViewMode('Week')">Tydzień</Button>
-            <Button type="button" data-view="Month" :class="{ selected: currentViewMode === 'Month' }" @click="changeViewMode('Month')">Miesiąc</Button>
+        <div class="w-full flex flex-wrap gap-2 justify-between mb-4">
+            <h1 class="text-3xl font-semibold">{{ name }}</h1>
+            <section class="flex flex-wrap gap-2">
+                <Button type="button" data-view="Half Day" :class="{ selected: currentViewMode === 'Half Day' }" @click="changeViewMode('Half Day')">Pół dnia</Button>
+                <Button type="button" data-view="Day" :class="{ selected: currentViewMode === 'Day' }" @click="changeViewMode('Day')">Dzień</Button>
+                <Button type="button" data-view="Week" :class="{ selected: currentViewMode === 'Week' }" @click="changeViewMode('Week')">Tydzień</Button>
+                <Button type="button" data-view="Month" :class="{ selected: currentViewMode === 'Month' }" @click="changeViewMode('Month')">Miesiąc</Button>
+            </section>
         </div>
         <Skeleton v-if="loading" width="100%" height="400px"></Skeleton>
         <GanttChart v-if="!loading && tasks.length > 0" :tasks="tasks" :viewMode="currentViewMode" @task-updated="onTaskUpdated" @task-date-updated="onTaskDateUpdated" @task-progress-updated="onTaskProgressUpdated" />

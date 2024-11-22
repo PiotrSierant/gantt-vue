@@ -51,7 +51,7 @@ onMounted(async () => {
     loading.value = false;
 });
 
-const fetchProcessDetail = async () => {
+async function fetchProcessDetail() {
     try {
         const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`);
         if (response.data.message) {
@@ -87,7 +87,7 @@ const fetchProcessDetail = async () => {
     } catch (error) {
         console.error('Błąd:', error);
     }
-};
+}
 async function fetchUsers() {
     axios
         .get(`${import.meta.env.VITE_APP_API_URL}/api/users-list`)
@@ -98,7 +98,7 @@ async function fetchUsers() {
             console.error('Error fetching users:', error);
         });
 }
-const resolver = ({ values }) => {
+function resolver({ values }) {
     const errors = {
         name: [],
         user_id: []
@@ -113,40 +113,75 @@ const resolver = ({ values }) => {
     }
 
     return { errors };
-};
-async function onSubmit() {
+}
+function validationOnSubmit() {
     if (form.name === '' && form.user_id === '') {
         touchedFields.name = true;
         touchedFields.user_id = true;
-        return;
+        return true;
     }
     if (form.name === '') {
         touchedFields.name = true;
-        return;
+        return true;
     } else if (form.user_id === '') {
         touchedFields.user_id = true;
-        return;
+        return true;
     }
+    return false;
+}
+function prepareDataForSubmit() {
+    const tasksToCalculate = [...form.data].splice(1);
 
-    let firstDate = '';
-    let lastDate = '';
+    // Suma iloczynów postępu i długości trwania zadań
+    const totalWeightedProgress = tasksToCalculate.reduce((sum, task) => {
+        const taskDuration = new Date(task.end) - new Date(task.start);
+        return sum + task.progress * taskDuration;
+    }, 0);
 
-    form.data.forEach((task) => {
-        if (!firstDate || new Date(task.start) < new Date(firstDate)) {
-            firstDate = task.start;
-        }
-        if (!lastDate || new Date(task.end) > new Date(lastDate)) {
-            lastDate = task.end;
-        }
-    });
+    // Suma wszystkich czasów trwania zadań w dniach
+    const totalDuration = tasksToCalculate.reduce((sum, task) => {
+        const taskDuration = new Date(task.end) - new Date(task.start);
+        return sum + taskDuration;
+    }, 0);
+
+    const averageProgress = (totalDuration ? totalWeightedProgress / totalDuration : 0).toFixed(2);
+
+    form.data[0].name = `Bieżący postę prac: ${averageProgress}%`;
+    form.data[0].progress = averageProgress;
+
+    if (form.data.length === 2) {
+        form.data[0].start = form.data[1].start;
+        form.data[0].end = form.data[1].end;
+        form.data[0].invalid = false;
+    } else if (form.data.length > 2) {
+        const earliestDate = tasksToCalculate.reduce((earliest, task) => {
+            const taskStart = new Date(task.start);
+            return taskStart < earliest ? taskStart : earliest;
+        }, new Date(tasksToCalculate[0].start));
+
+        const latestDate = tasksToCalculate.reduce((latest, task) => {
+            const taskEnd = new Date(task.end);
+            return taskEnd > latest ? taskEnd : latest;
+        }, new Date(tasksToCalculate[0].end));
+
+        form.data[0].start = earliestDate;
+        form.data[0].end = latestDate;
+    }
 
     const processData = {
         name: form.name,
         user_id: form.user_id.id,
-        data: JSON.stringify(form.data)
+        data: JSON.stringify(form.data.map((task) => ({ ...task, dependencies: task.dependencies.map((dep) => dep.id) })))
     };
+
+    return processData;
+}
+async function onSubmit() {
+    if (validationOnSubmit()) return;
+    const data = prepareDataForSubmit();
+
     try {
-        const response = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`, processData);
+        const response = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`, data);
 
         if (response.status === 200) {
             toast.add({
@@ -203,6 +238,7 @@ async function onSubmit() {
 async function addTask() {
     handleToggleSaveLoader();
     const deps = newTask.dependencies.length > 0 ? newTask.dependencies.map((dep) => ({ id: dep.id, name: dep.name })) : [];
+
     form.data.push({ ...newTask, id: uuidv4(), dependencies: deps, _index: form.data.length });
     Object.keys(newTask).forEach((key) => {
         newTask[key] = key === 'progress' ? 0 : '';
@@ -249,6 +285,22 @@ async function onRowReorder(event) {
 }
 function handleToggleSaveLoader() {
     saveLoader.value = true;
+}
+function onSubmitName() {
+    handleToggleSaveLoader();
+    onSubmit();
+}
+function onSubmitDate() {
+    handleToggleSaveLoader();
+    onSubmit();
+}
+function onSubmitDep() {
+    handleToggleSaveLoader();
+    onSubmit();
+}
+function onSubmitProgress() {
+    handleToggleSaveLoader();
+    onSubmit();
 }
 </script>
 
@@ -306,45 +358,27 @@ function handleToggleSaveLoader() {
             <DataTable v-if="form.data.length" :key="form.data" :value="form.data.filter((item) => item.id != 'progress')" resizableColumns showGridlines @rowReorder="onRowReorder">
                 <Column field="name" header="Nazwa" style="min-width: 100px">
                     <template #body="{ data }">
-                        <InputText
-                            v-model="data.name"
-                            placeholder="Nazwa zadania"
-                            aria-describedby="Nazwa zadania"
-                            class="w-full"
-                            @blur="
-                                handleToggleSaveLoader();
-                                onSubmit();
-                            "
-                        />
+                        <InputText v-model="data.name" placeholder="Nazwa zadania" aria-describedby="Nazwa zadania" class="w-full" @blur="onSubmitName" />
                     </template>
                 </Column>
                 <Column field="start" header="Rozpoczęcie" style="min-width: 90px; max-width: 90px">
                     <template #body="{ data }">
-                        <DatePicker v-model="data.start" dateFormat="dd/mm/yy" showTime hourFormat="24" placeholder="Data początkowa" class="w-full" @update:modelValue="onSubmit" />
+                        <DatePicker v-model="data.start" dateFormat="dd/mm/yy" showTime hourFormat="24" placeholder="Data początkowa" class="w-full" @update:modelValue="onSubmitDate" />
                     </template>
                 </Column>
                 <Column field="end" header="Zakończenie" style="min-width: 90px; max-width: 90px">
                     <template #body="{ data }">
-                        <DatePicker v-model="data.end" dateFormat="dd/mm/yy" showTime hourFormat="24" placeholder="Data końcowa" class="w-full" @update:modelValue="onSubmit" />
+                        <DatePicker v-model="data.end" dateFormat="dd/mm/yy" showTime hourFormat="24" placeholder="Data końcowa" class="w-full" @update:modelValue="onSubmitDate" />
                     </template>
                 </Column>
                 <Column field="dependencies" header="Zależności" style="min-width: 100px">
                     <template #body="{ data }">
-                        <MultiSelect v-model="data.dependencies" :options="selectValue" optionLabel="name" placeholder="Wybierz zależności" class="w-full" @blur="onSubmit()" />
+                        <MultiSelect v-model="data.dependencies" :options="selectValue.filter((task) => task.id !== data.id && task.id !== 'progress')" optionLabel="name" placeholder="Wybierz zależności" class="w-full" @blur="onSubmitDep" />
                     </template>
                 </Column>
                 <Column field="progress" header="Progres(%)" style="min-width: 50px; max-width: 50px">
                     <template #body="{ data }">
-                        <InputText
-                            v-model="data.progress"
-                            placeholder="progress"
-                            aria-describedby="Progres zadania"
-                            class="w-full"
-                            @blur="
-                                handleToggleSaveLoader();
-                                onSubmit();
-                            "
-                        />
+                        <InputText v-model="data.progress" placeholder="progress" aria-describedby="Progres zadania" class="w-full" @blur="onSubmitProgress" />
                     </template>
                 </Column>
                 <Column class="w-24 !text-end" style="min-width: 50px; max-width: 60px">

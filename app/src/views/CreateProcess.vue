@@ -120,7 +120,7 @@ const onSubmit = async (e) => {
     };
 
     try {
-        const response = await axios.post('https://galeon-202410.omnimes.com/api/process', processData);
+        const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/process`, processData);
 
         if (response.status === 201) {
             toast.add({
