@@ -1,8 +1,7 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
 
-const envFile = fs.existsSync('.env.local') ? '.env.local' : '.env';
-dotenv.config({ path: envFile });
+dotenv.config({ path: '.env' });
 
 const express = require('express');
 const mysql = require('mysql2');
