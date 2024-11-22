@@ -1,10 +1,10 @@
 <script setup>
-import { useFullscreen } from '@vueuse/core';
-import axios from 'axios';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { computed, onMounted, ref } from 'vue';
 import Timer from './Timer.vue';
+import { computed, ref, onMounted } from 'vue';
+import { useFullscreen } from '@vueuse/core';
+import axios from 'axios';
 
 const props = defineProps({
     zegarId: {
@@ -18,9 +18,8 @@ const loading = ref(true);
 
 const fetchZegarDetails = async () => {
     try {
-        const response = await axios.get(`https://galeon-202410.omnimes.com/api/dashboard-zegary/${props.zegarId}`);
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/dashboard-zegary/${props.zegarId}`);
         zegar.value = response.data;
-        console.log('Zegar:', zegar.value);
     } catch (error) {
         console.error(`Błąd podczas pobierania szczegółów zegara ${props.zegarId}:`, error);
     } finally {
@@ -157,4 +156,3 @@ const { toggle, isFullscreen } = useFullscreen(el);
         </section>
     </div>
 </template>
-

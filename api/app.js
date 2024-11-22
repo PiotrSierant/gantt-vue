@@ -1,3 +1,9 @@
+const dotenv = require('dotenv');
+const fs = require('fs');
+
+const envFile = fs.existsSync('.env.local') ? '.env.local' : '.env';
+dotenv.config({ path: envFile });
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -5,19 +11,14 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
-// app.use(cors({
-//     // origin: 'http://localhost:8081' // Pozwól na połączenia z portu 8081
-//     // origin: 'http://localhost:5173' // Pozwól na połączenia z portu 
-//     origin: 'https://galeon.omnimes.pl'
-// }));
-app.use(cors()); // Zezwól na połączenia z dowolnego źródła
+app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-    host: 'mp1.atthost24.pl',
-    user: '14597_galeon1',       // Ustaw nazwę użytkownika
-    password: 'Em2Hfd8oL50d',    // Ustaw hasło
-    database: '14597_galeon1' // Ustaw nazwę bazy danych
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 db.connect((err) => {

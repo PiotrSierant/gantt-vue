@@ -33,7 +33,7 @@ const userId = ref('');
 */
 const fetchProcessDetail = async () => {
     try {
-        const response = await axios.get(`https://galeon-202410.omnimes.com/api/process/${processId.value}`);
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`);
         if (response.data.message) {
             // Jeśli brak danych, ustaw loading i puste zadania
             tasks.splice(0, tasks.length); // Czyścimy listę zadań
@@ -102,7 +102,7 @@ async function updateSummaryTask() {
 
     try {
         await axios
-            .put(`https://galeon-202410.omnimes.com/api/process/${idGanttTask.value}`, newData)
+            .put(`${import.meta.env.VITE_APP_API_URL}/api/process/${idGanttTask.value}`, newData)
             .then(() => {
                 fetchProcessDetail();
             })

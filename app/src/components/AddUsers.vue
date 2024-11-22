@@ -54,7 +54,7 @@ const onSubmit = async (e) => {
     };
 
     try {
-        const response = await axios.post(`https://galeon-202410.omnimes.com/api/users`, data);
+        const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/users`, data);
         if (response.data.message) {
             toast.add({ severity: 'success', summary: 'Użytkownik dodany.', life: 3000 });
             emit('userAdded', response.data.user);

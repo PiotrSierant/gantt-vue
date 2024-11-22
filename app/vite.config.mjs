@@ -1,5 +1,4 @@
 import { fileURLToPath, URL } from 'node:url';
-
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
 import Components from 'unplugin-vue-components/vite';
@@ -19,14 +18,7 @@ export default defineConfig(({ mode }) => {
             commonjs(),
             removeConsole({
                 includes: ['log', 'warn', 'error', 'info'],
-                // externalValue: ['noRemove', ...],
-                custom: [
-                    'debugger',
-                    'console.log()'
-                    // "console.warn()",
-                    // "console.error()",
-                    // "console.info()",
-                ]
+                custom: ['debugger', 'console.log()', 'console.error()', 'console.warn()', 'console.info()', 'console.debug()', 'console.clear()']
             }),
             Components({
                 resolvers: [PrimeVueResolver()]

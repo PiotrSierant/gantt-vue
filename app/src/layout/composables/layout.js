@@ -1,10 +1,10 @@
-import { computed, onMounted, reactive, readonly } from 'vue';
+import { computed, reactive, readonly, onMounted } from 'vue';
 
 const layoutConfig = reactive({
     preset: 'Aura',
     primary: 'emerald',
     surface: null,
-    darkTheme: true, // Domyślny tryb ciemny
+    darkTheme: true,
     menuMode: 'static'
 });
 
@@ -40,13 +40,18 @@ export function useLayout() {
     };
 
     const toggleDarkMode = () => {
-        layoutConfig.darkTheme = !layoutConfig.darkTheme;
+        if (!document.startViewTransition) {
+            executeDarkModeToggle();
 
-        if (layoutConfig.darkTheme) {
-            document.documentElement.classList.add('app-dark');
-        } else {
-            document.documentElement.classList.remove('app-dark');
+            return;
         }
+
+        document.startViewTransition(() => executeDarkModeToggle(event));
+    };
+
+    const executeDarkModeToggle = () => {
+        layoutConfig.darkTheme = !layoutConfig.darkTheme;
+        document.documentElement.classList.toggle('app-dark');
     };
 
     const onMenuToggle = () => {
@@ -82,20 +87,5 @@ export function useLayout() {
         }
     });
 
-    return {
-        layoutConfig: readonly(layoutConfig),
-        layoutState: readonly(layoutState),
-        onMenuToggle,
-        isSidebarActive,
-        isDarkTheme,
-        getPrimary,
-        getSurface,
-        setActiveMenuItem,
-        toggleDarkMode,
-        setPrimary,
-        setSurface,
-        setPreset,
-        resetMenu,
-        setMenuMode
-    };
+    return { layoutConfig: readonly(layoutConfig), layoutState: readonly(layoutState), onMenuToggle, isSidebarActive, isDarkTheme, getPrimary, getSurface, setActiveMenuItem, toggleDarkMode, setPrimary, setSurface, setPreset, resetMenu, setMenuMode };
 }

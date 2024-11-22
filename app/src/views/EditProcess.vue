@@ -53,7 +53,7 @@ onMounted(async () => {
 
 const fetchProcessDetail = async () => {
     try {
-        const response = await axios.get(`https://galeon-202410.omnimes.com/api/process/${processId.value}`);
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`);
         if (response.data.message) {
             // Jeśli brak danych, ustaw loading i puste zadania
             form.data.splice(0, form.data.length); // Czyścimy listę zadań
@@ -90,7 +90,7 @@ const fetchProcessDetail = async () => {
 };
 async function fetchUsers() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/users-list`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/users-list`)
         .then((response) => {
             usersList.splice(0, usersList.length, ...response.data);
         })
@@ -146,7 +146,7 @@ async function onSubmit() {
         data: JSON.stringify(form.data)
     };
     try {
-        const response = await axios.put(`https://galeon-202410.omnimes.com/api/process/${processId.value}`, processData);
+        const response = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/process/${processId.value}`, processData);
 
         if (response.status === 200) {
             toast.add({

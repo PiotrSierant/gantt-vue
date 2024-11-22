@@ -11,14 +11,14 @@ let usersList = reactive([]);
 let process = reactive([]);
 const loading = ref(true);
 
-onMounted(() => {
-    fetchUsers();
-    fetchProcessList();
+onMounted(async () => {
+    await fetchUsers();
+    await fetchProcessList();
 });
 
 function fetchUsers() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/users-list`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/users-list`)
         .then((response) => {
             usersList.splice(0, usersList.length, ...response.data);
         })
@@ -29,9 +29,10 @@ function fetchUsers() {
             loading.value = false;
         });
 }
+
 function fetchProcessList() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/process-list-with-users`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/process-list-with-users`)
         .then((response) => {
             process.splice(0, process.length, ...response.data);
         })

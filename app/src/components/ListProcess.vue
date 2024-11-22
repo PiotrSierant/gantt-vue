@@ -23,7 +23,7 @@ watchEffect(() => props.users);
 const handleProcessChange = async (data) => {
     try {
         await axios
-            .put(`https://galeon-202410.omnimes.com/api/process-user/${data.process_id}`, { user_id: data.user.id })
+            .put(`${import.meta.env.VITE_APP_API_URL}/api/process-user/${data.process_id}`, { user_id: data.user.id })
             .then(() => {
                 console.log('Zaktualizowano proces dla użytkownika:', data.user.id);
             })
@@ -37,7 +37,7 @@ const handleProcessChange = async (data) => {
 const handleDelete = async (data) => {
     try {
         await axios
-            .delete(`https://galeon-202410.omnimes.com/api/process/${data.process_id}`)
+            .delete(`${import.meta.env.VITE_APP_API_URL}/api/process/${data.process_id}`)
             .then(() => {
                 toast.add({ severity: 'success', summary: 'Proces został usunięty.', life: 3000 });
                 emit('updateProcessList', data.process_id);

@@ -11,67 +11,13 @@ import { useToast } from 'primevue/usetoast';
 import { onMounted, reactive, ref, watch } from 'vue';
 
 const toast = useToast();
+
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 watch([getPrimary, getSurface, isDarkTheme], () => {});
+
 let usersList = reactive([]);
 const loading = ref(true);
 
-// const dataArr = [
-//     {
-//         id: 'prod_id_1',
-//         name: 'Przygotowanie materiałów',
-//         start: '2024-11-19T07:00:00.000Z',
-//         end: '2024-11-20T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: [],
-//         _index: 0
-//     },
-//     {
-//         id: 'prod_id_2',
-//         name: 'Cięcie materiałów',
-//         start: '2024-11-21T07:00:00.000Z',
-//         end: '2024-11-22T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: ['prod_id_1'],
-//         _index: 1
-//     },
-//     {
-//         id: 'prod_id_3',
-//         name: 'Montaż komponentów',
-//         start: '2024-11-23T07:00:00.000Z',
-//         end: '2024-11-25T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: ['prod_id_2'],
-//         _index: 2
-//     },
-//     {
-//         id: 'prod_id_4',
-//         name: 'Testowanie produktu',
-//         start: '2024-11-26T07:00:00.000Z',
-//         end: '2024-11-27T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: ['prod_id_3'],
-//         _index: 3
-//     },
-//     {
-//         id: 'prod_id_5',
-//         name: 'Pakowanie',
-//         start: '2024-11-28T07:00:00.000Z',
-//         end: '2024-11-29T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: ['prod_id_4'],
-//         _index: 4
-//     },
-//     {
-//         id: 'prod_id_6',
-//         name: 'Wysyłka',
-//         start: '2024-11-30T07:00:00.000Z',
-//         end: '2024-12-01T07:00:00.000Z',
-//         progress: 0,
-//         dependencies: ['prod_id_5'],
-//         _index: 5
-//     }
-// ];
 // Initial values for the form
 const form = reactive({
     name: '',
@@ -101,7 +47,7 @@ onMounted(() => {
 
 function fetchUsers() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/users-list`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/users-list`)
         .then((response) => {
             usersList.splice(0, usersList.length, ...response.data);
         })

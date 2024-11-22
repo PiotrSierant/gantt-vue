@@ -20,7 +20,7 @@ onMounted(() => {
 
 function fetchUsers() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/users`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/users`)
         .then((response) => {
             users.splice(0, users.length, ...response.data);
             console.log(users);
@@ -35,7 +35,7 @@ function fetchUsers() {
 
 function fetchProcessList() {
     axios
-        .get(`https://galeon-202410.omnimes.com/api/process-list`)
+        .get(`${import.meta.env.VITE_APP_API_URL}/api/process-list`)
         .then((response) => {
             processList.splice(0, processList.length, ...response.data);
         })
