@@ -1,69 +1,37 @@
 <script setup>
-import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
 import Timer from './Timer.vue';
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import { useFullscreen } from '@vueuse/core';
-import axios from 'axios';
 
 const props = defineProps({
-    zegarId: {
-        type: Number,
-        required: true
-    }
-});
-
-const zegar = ref(null);
-const loading = ref(true);
-
-const fetchZegarDetails = async () => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/dashboard-zegary/${props.zegarId}`);
-        zegar.value = response.data;
-    } catch (error) {
-        console.error(`Błąd podczas pobierania szczegółów zegara ${props.zegarId}:`, error);
-    } finally {
-        loading.value = false;
-    }
-};
-
-onMounted(async () => {
-    await fetchZegarDetails();
-    setInterval(() => {
-        fetchZegarDetails();
-    }, 5000);
-});
-
-const currentDate = ref(new Date());
-const updateCurrentDate = () => {
-    currentDate.value = new Date();
-};
-
-const name = computed(() => zegar.value?.name || 'Brak nazwy');
-const formattedNowDate = computed(() => format(currentDate.value, 'dd MMM yyyy / HH:mm', { locale: pl }));
-const user = computed(() => zegar.value?.user || {});
-const parsedData = computed(() => (zegar.value ? JSON.parse(zegar.value.data) : []));
-
-onMounted(() => {
-    const interval = setInterval(updateCurrentDate, 1000); // Aktualizacja co sekundę
-    onUnmounted(() => {
-        clearInterval(interval);
-    });
-});
-
-const lastDate = computed(() => (parsedData.value[0]?.end ? new Date(parsedData.value[0].end) : null));
-const daysLeft = computed(() => {
-    if (!lastDate.value) return 0;
-    const timeDifference = lastDate.value.getTime() - currentDate.value.getTime();
-    return timeDifference > 0 ? Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) : 0;
-});
-
-const progress = computed(() => zegar.value?.progress || 0);
-const progressClass = computed(() => {
-    if (progress.value <= 20) return 'bg-red-600';
-    if (progress.value <= 50) return 'bg-yellow-500';
-    if (progress.value <= 80) return 'bg-blue-600';
-    return 'bg-green-600';
+  name: {
+    type: String,
+    required: true
+  },
+  formattedNowDate: {
+    type: String,
+    required: true
+  },
+  user: {
+    type: Object,
+    required: true
+  },
+  parsedData: {
+    type: Array,
+    required: true
+  },
+  daysLeft: {
+    type: Number,
+    required: true
+  },
+  progress: {
+    type: Number,
+    required: true
+  },
+  progressClass: {
+    type: String,
+    required: true
+  }
 });
 
 const el = ref(null);
@@ -71,8 +39,7 @@ const { toggle, isFullscreen } = useFullscreen(el);
 </script>
 
 <template>
-    <Skeleton v-if="loading" width="100%" height="300px"></Skeleton>
-    <div ref="el" v-else class="gap-2 border rounded-md @container">
+    <div ref="el" class="gap-2 border rounded-md @container">
         <div v-if="isFullscreen" class="w-full min-h-[100vh] p-8 bg-white dark:bg-black">
             <section class="w-full flex justify-between pb-6 border-b-8">
                 <h1 class="text-9xl font-bold">{{ name }}</h1>
@@ -81,6 +48,7 @@ const { toggle, isFullscreen } = useFullscreen(el);
                     <Button icon="pi pi-times" severity="danger" rounded aria-label="Exit" size="large" @click="toggle" />
                 </div>
             </section>
+
 
             <section class="flex flex-row w-full justify-between border-b-8">
                 <div class="w-5/12 border-r-8 border-l-8">
@@ -94,12 +62,14 @@ const { toggle, isFullscreen } = useFullscreen(el);
                 </div>
             </section>
 
+
             <div class="col-span-3 flex justify-between items-center p-8 border-l-8 border-r-8">
                 <div class="w-full bg-gray-400 h-8">
                     <div :class="progressClass + ' h-8'" :style="{ width: progress + '%' }"></div>
                 </div>
                 <div class="ml-2 text-sm font-bold">{{ progress }}%</div>
             </div>
+
 
             <section class="flex flex-row w-full justify-between border-8">
                 <!-- Chart Section -->
@@ -140,6 +110,7 @@ const { toggle, isFullscreen } = useFullscreen(el);
                 </div>
             </section>
 
+
             <section class="flex flex-col @sm:flex-row w-full justify-between border-b">
                 <!-- Chart Section -->
                 <div class="flex flex-col p-2 @sm:p-4 border-b @sm:border-b-0">
@@ -157,6 +128,7 @@ const { toggle, isFullscreen } = useFullscreen(el);
                 </div>
             </section>
 
+
             <!-- Progress Section -->
             <div class="col-span-3 flex justify-between items-center p-2 @sm:p-4">
                 <div class="w-full bg-gray-400 h-4">
@@ -166,4 +138,5 @@ const { toggle, isFullscreen } = useFullscreen(el);
             </div>
         </section>
     </div>
+
 </template>
